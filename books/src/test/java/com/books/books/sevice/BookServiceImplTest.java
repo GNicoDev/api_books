@@ -13,13 +13,17 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.springframework.boot.test.context.SpringBootTest;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.*;
-@RunWith(MockitoJUnitRunner.class)
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.verify;
+
+@SpringBootTest
 class BookServiceImplTest {
     @Mock
     BookRepository bookRepository;
@@ -66,7 +70,7 @@ class BookServiceImplTest {
 
         Assert.assertThat(idsBookselectByGenre, CoreMatchers.is(Arrays.asList(2L)));
     }
-    
+
 
 ////////////////////////////////////////////////////////////////////////////////////
     @Test
@@ -76,6 +80,10 @@ class BookServiceImplTest {
         Book savedBook = bookService.saveBook(book01);
 
         assertNotNull(savedBook);
+
+        assertEquals(book01,savedBook);
+
+        System.out.println(" ID Book saved: "+ savedBook.getId());
     }
 ////////////////////////////////////////////////////////////////////////////////////
     @Test
@@ -83,14 +91,7 @@ class BookServiceImplTest {
         // bookRepository.deleteById(book01.getId());
         //verify(bookRepository).deleteById(book01.getId()); // check that the method was called
         Mockito.doNothing().when(bookRepository).deleteById(book01.getId());
-        Mockito.when(bookRepository.findAll()).thenReturn(Arrays.asList(book02,book03));
-
-
         bookService.deleteBookById(book01.getId());
-        List<Book> bookList = bookService.listAllBooks();
-
-        List<Long> idsBookselectByGenre = bookList.stream().map(book -> book.getId()).collect(Collectors.toList());
-
-        Assert.assertThat(idsBookselectByGenre, CoreMatchers.is(Arrays.asList(2L,3L)));
+        verify(bookRepository).deleteById(any());
     }
 }
