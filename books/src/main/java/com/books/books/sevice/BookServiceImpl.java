@@ -1,10 +1,12 @@
 package com.books.books.sevice;
 
+import com.books.books.controller.dto.BookDto;
 import com.books.books.entity.Book;
 import com.books.books.entity.Genre;
 import com.books.books.repository.BookRepository;
 import org.springframework.stereotype.Service;
 
+import java.util.EnumSet;
 import java.util.List;
 import java.util.stream.Collectors;
 @Service
@@ -44,4 +46,15 @@ public class BookServiceImpl implements BookService{
     public void deleteBookById(Long id) {
         bookRepository.deleteById(id);
     }
+
+    @Override
+    public boolean dtoIsOk(BookDto bookDto) {
+        if(bookDto==null)
+            return false;
+        else if (bookDto.getName()!=null && bookDto.getGenre()!=null &&
+                bookDto.getAuthor()!=null && bookDto.getPrice()!=null)
+            return true;
+        else return false;
+    }
+
 }

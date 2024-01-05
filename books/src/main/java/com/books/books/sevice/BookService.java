@@ -1,6 +1,6 @@
 package com.books.books.sevice;
+import com.books.books.controller.dto.BookDto;
 import com.books.books.entity.*;
-import com.books.books.entity.Genre;
 
 import java.util.List;
 
@@ -14,5 +14,7 @@ public interface BookService {
     Book saveBook(Book newBook);
 
     void deleteBookById(Long id);
+
+    boolean dtoIsOk(BookDto bookDto);
 
 }

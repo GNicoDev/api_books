@@ -27,5 +27,5 @@ public class Book {
     private Genre genre;
 
     @Column (nullable = false)
-    private double price;
+    private Double price;
 }

@@ -1,5 +1,6 @@
 package com.books.books.sevice;
 
+import com.books.books.controller.dto.BookDto;
 import com.books.books.entity.Book;
 import com.books.books.entity.Genre;
 import com.books.books.repository.BookRepository;
@@ -88,10 +89,45 @@ class BookServiceImplTest {
 ////////////////////////////////////////////////////////////////////////////////////
     @Test
     void deleteBookById() {
-        // bookRepository.deleteById(book01.getId());
-        //verify(bookRepository).deleteById(book01.getId()); // check that the method was called
         Mockito.doNothing().when(bookRepository).deleteById(book01.getId());
         bookService.deleteBookById(book01.getId());
         verify(bookRepository).deleteById(any());
     }
+
+////////////////////////////////////////////////////////////////////////////////////
+
+    @Test
+    void dtoIsOk_return_true_when_all_attributes_are_complete(){
+        BookDto bookDto = BookDto.builder()
+                .name("El Proceso")
+                .genre(Genre.DRAMA)
+                .author("Kafka")
+                .price(5600.0)
+                .build();
+        boolean isOk = bookService.dtoIsOk(bookDto);
+
+        assertTrue(isOk);
+    }
+
+    @Test
+    void dtoIsOk_return_false_when_someone_attribute_is_null(){
+        BookDto bookDto = BookDto.builder()
+                .name("El Proceso")
+                .genre(null)
+                .author("Kafka")
+                .price(5600.0)
+                .build();
+        boolean isOk = bookService.dtoIsOk(bookDto);
+
+        assertFalse(isOk);
+    }
+
+    @Test
+    void dtoIsOk_return_false_when_bookDto_is_null(){
+        BookDto bookDto = null;
+        boolean isOk = bookService.dtoIsOk(bookDto);
+        assertFalse(isOk);
+    }
+////////////////////////////////////////////////////////////////////////////////////
+
 }

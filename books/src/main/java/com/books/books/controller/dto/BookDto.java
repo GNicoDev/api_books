@@ -17,5 +17,5 @@ public class BookDto {
 
     private Genre genre;
 
-    private double price;
+    private Double price;
 }

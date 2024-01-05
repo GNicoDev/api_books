@@ -4,6 +4,7 @@ import com.books.books.controller.dto.BookDto;
 import com.books.books.entity.Book;
 import com.books.books.entity.Genre;
 import com.books.books.sevice.BookService;
+import jakarta.persistence.GeneratedValue;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -22,30 +23,28 @@ public class BookController {
     }
 
     @GetMapping("allbooks")
-    public ResponseEntity<?> listAllBooks(){
+    public ResponseEntity<?> listAllBooks() {
         List<Book> bookList = bookService.listAllBooks();
-        if (bookList!= null) {
-            List<BookDto> bookDtoList = new ArrayList<>();
-            BookDto bookDto;
-            for (Book b : bookList) {
-                bookDto = BookDto.builder()
-                        .id(b.getId())
-                        .author(b.getAuthor())
-                        .genre(b.getGenre())
-                        .name(b.getName())
-                        .price(b.getPrice())
-                        .build();
-                bookDtoList.add(bookDto);
-            }
-            return ResponseEntity.ok(bookDtoList);
+        List<BookDto> bookDtoList = new ArrayList<>();
+        BookDto bookDto;
+        for (Book b : bookList) {
+            bookDto = BookDto.builder()
+                    .id(b.getId())
+                    .author(b.getAuthor())
+                    .genre(b.getGenre())
+                    .name(b.getName())
+                    .price(b.getPrice())
+                    .build();
+            bookDtoList.add(bookDto);
         }
-        else return ResponseEntity.notFound().build();
+        return ResponseEntity.ok(bookDtoList);
     }
 
-    @GetMapping("listbooksbygender/{genre}")
-    public ResponseEntity<?> listBooksByGenre(@PathVariable Genre genre){
-        List<Book> bookList = bookService.listAllBooksByGenre(genre);
-        if (bookList!=null) {
+    @GetMapping("listbooksbygender/{value}")
+    public ResponseEntity<?> listBooksByGenre(@PathVariable String value) {
+        Genre genre = Genre.convertValue(value);
+        if (genre != null) {
+            List<Book> bookList = bookService.listAllBooksByGenre(genre);
             List<BookDto> bookDtoList = new ArrayList<>();
             BookDto bookDto;
             for (Book b : bookList) {
@@ -59,12 +58,12 @@ public class BookController {
                 bookDtoList.add(bookDto);
             }
             return ResponseEntity.ok(bookDtoList);
-        }else return ResponseEntity.notFound().build();
+        } else return ResponseEntity.badRequest().body("Genre not exist");
     }
 
     @PostMapping("/newbook")
-    public ResponseEntity<?> newBook(@RequestBody BookDto bookDto){
-        if (bookDto!=null){
+    public ResponseEntity<BookDto> newBook(@RequestBody BookDto bookDto) {
+        if (bookService.dtoIsOk(bookDto)) {
             Book book = Book.builder()
                     .name(bookDto.getName())
                     .author(bookDto.getAuthor())
@@ -79,7 +78,7 @@ public class BookController {
     }
 
     @DeleteMapping("deletebook/{id}")
-    public ResponseEntity<?> deleteBook(@PathVariable Long id){
+    public ResponseEntity<?> deleteBook(@PathVariable Long id) {
         bookService.deleteBookById(id);
         return ResponseEntity.ok("Registro Eliminado");
     }
