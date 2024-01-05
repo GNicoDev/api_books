@@ -11,10 +11,10 @@ public interface BookService {
 
     List<Book> findBookByName(String name);
 
-    Book saveBook(Book newBook);
+    BookDto saveBook(BookDto newBook);
 
     void deleteBookById(Long id);
 
-    boolean dtoIsOk(BookDto bookDto);
+    Boolean dtoIsOk(BookDto bookDto);
 
 }

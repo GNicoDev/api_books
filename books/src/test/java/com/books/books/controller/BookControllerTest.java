@@ -4,121 +4,126 @@ import com.books.books.controller.dto.BookDto;
 import com.books.books.entity.Book;
 import com.books.books.entity.Genre;
 import com.books.books.sevice.BookService;
+import com.books.books.sevice.BookServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
+import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.http.ResponseEntity;
-import java.util.Arrays;
+import org.springframework.http.MediaType;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MockMvcBuilder;
+import org.springframework.test.web.servlet.ResultMatcher;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.web.context.WebApplicationContext;
+import org.testcontainers.shaded.org.hamcrest.Matchers;
 
-@SpringBootTest
+import java.util.List;
+import java.util.regex.Matcher;
+
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.when;
+
+@WebMvcTest(BookController.class)
 class BookControllerTest {
 
     @MockBean
-    private BookService bookService;
+    private BookServiceImpl bookService;
 
     @Autowired
-    BookController bookController = new BookController(bookService);
+    private WebApplicationContext webApplicationContext;
 
-    private Book book, postBook;
+    @Autowired
+    private MockMvc mockMvc;
+
+    private Book book;
 
     private BookDto bookDto;
 
+/*
     @BeforeEach
+    void setUpMockMvc (){
+        this.mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).build();
+    }   */
+/*    @BeforeEach
     void setUp() {
-        book = Book.builder()
+        bookDto =BookDto.builder()
+                .name("El Aleph")
+                .author("Cortazar")
+                .genre(Genre.DRAMA)
+                .price(6800.59)
+                .build();
+
+        book =Book.builder()
                 .id(1L)
-                .author("Borges")
-                .genre(Genre.DRAMA)
-                .name("El Aleph")
-                .price(5600.90)
+                .name("El Proceso")
+                .author("Kafka")
+                .genre(Genre.THRILLER)
+                .price(8500.0)
                 .build();
+    }   */
 
-        bookDto = BookDto.builder()
-                .author("Borges")
-                .genre(Genre.DRAMA)
-                .name("El Aleph")
-                .price(5600.90)
-                .build();
-
-        postBook = Book.builder()
-                .author("Borges")
-                .genre(Genre.DRAMA)
-                .name("El Aleph")
-                .price(5600.90)
-                .build();
+    @Test
+    void shouldCreateMockMvc(){
+        assertNotNull(mockMvc);
     }
 
 /////////////////////////////////////////////////////////////////////////////////////////
-
     @Test
-    void listAllBooks() {
-        Mockito.when(bookService.listAllBooks()).thenReturn(Arrays.asList(book));
-        ResponseEntity<?> serviceResponse;
-        serviceResponse = bookController.listAllBooks();
-        System.out.println(serviceResponse);
+    void should_return_listAllBooks() throws Exception {
+        when(bookService.listAllBooks()).thenReturn(List.of(new Book(1L,"El Aleph","Borges", Genre.THRILLER,5600.0)));
+
+        this.mockMvc.perform(MockMvcRequestBuilders.get("/api/book/allbooks"))
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.jsonPath("$[0].name").value("El Aleph"));
     }
-
-/////////////////////////////////////////////////////////////////////////////////////////
-
+    /////////////////////////////////////////////////////////////////////////////////////////
     @Test
-    void listBooksByGenre() throws Exception {
+    void listBooksByGenre_should_return_status_OK() throws Exception {
 
-        Mockito.when(bookService.listAllBooksByGenre(Genre.DRAMA)).thenReturn(Arrays.asList(book));
-        ResponseEntity<?> serviceResponse;
-        serviceResponse = bookController.listBooksByGenre("DRAMA");
-        System.out.println(serviceResponse);
-    }
+        when(bookService.listAllBooksByGenre(Genre.THRILLER)).thenReturn(List.of(new Book(1L,"El Aleph","Borges", Genre.THRILLER,5600.0)));
 
-    @Test
-    void listBooksByGenre_return_BADREQUEST_because_the_genre_not_exist() throws Exception {
+        this.mockMvc
+                .perform(MockMvcRequestBuilders.get("/api/book/listbooksbygender/THRILLER"))
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.jsonPath("$[0].name").value("El Aleph"));
 
-        ResponseEntity<?> serviceResponse;
-        serviceResponse = bookController.listBooksByGenre("COMEDY");
-        System.out.println(serviceResponse);
-    }
-
-/////////////////////////////////////////////////////////////////////////////////////////
-
-    @Test
-    void newBook_return_OK() throws Exception {
-
-        Mockito.when(bookService.saveBook(postBook)).thenReturn(book);
-        Mockito.when(bookService.dtoIsOk(bookDto)).thenReturn(true);
-
-        ResponseEntity<BookDto> serviceResponse;
-        serviceResponse = bookController.newBook(bookDto);
-        System.out.println(serviceResponse);
     }
 
     @Test
-    void newBook_return_BAD_Request() throws Exception {
+    void listBooksByGenre_should_return_status_BADREQUEST_because_Genre_not_exist() throws Exception {
 
-        Mockito.when(bookService.saveBook(postBook)).thenReturn(book);
 
-        ResponseEntity<BookDto> serviceResponse;
-        serviceResponse = bookController.newBook(null);
-        System.out.println(serviceResponse);
+        this.mockMvc
+                .perform(MockMvcRequestBuilders.get("/api/book/listbooksbygender/COMEDY"))
+                .andExpect(MockMvcResultMatchers.status().isBadRequest());
+    }
+    /////////////////////////////////////////////////////////////////////////////////////////
+    @Test
+    void should_create_newBook() throws Exception {
+ //       Boolean value = bookService.dtoIsOk(bookDto);
+//        System.out.println(value);
+//        Mockito.when(bookService.dtoIsOk(BookDto.builder().build())).thenReturn(true);
+        //when(bookService.saveBook(bookDto)).thenReturn(bookDto);
+        this.mockMvc.perform(MockMvcRequestBuilders.post("/api/book/newbook")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"name\": \"El Aleph\", \"author\": \"Borges\", \"genre\" : \"DRAMA\", \"price\" : \"6800.59\"}"))
+                .andExpect(MockMvcResultMatchers.status().isOk());
+
     }
 
+    /////////////////////////////////////////////////////////////////////////////////////////
     @Test
-    void newBook_return_BADREQUEST_when_bookDto_is_incomplete() throws Exception {
-        bookDto.setAuthor(null);
-        Mockito.when(bookService.saveBook(postBook)).thenReturn(book);
+    void deleteBook() throws Exception {
+        Mockito.doNothing().when(bookService).deleteBookById(1L);
 
-        ResponseEntity<BookDto> serviceResponse;
-        serviceResponse = bookController.newBook(bookDto);
-        System.out.println(serviceResponse);
-    }
-/////////////////////////////////////////////////////////////////////////////////////////
+        this.mockMvc.perform(MockMvcRequestBuilders.delete("/api/book/deletebook/1"))
+                .andExpect(MockMvcResultMatchers.status().isOk());
 
-    @Test
-    void deleteBook() {
-        Mockito.doNothing().when(bookService).deleteBookById(book.getId());
-        ResponseEntity<?> serviceResponse;
-        serviceResponse = bookController.deleteBook(1L);
-        System.out.println(serviceResponse);
     }
 }

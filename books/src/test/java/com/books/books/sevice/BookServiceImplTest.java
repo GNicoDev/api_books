@@ -33,12 +33,21 @@ class BookServiceImplTest {
 
     Book book01, book02, book03;
 
+    BookDto bookDto;
+
     @BeforeEach
     void setUp() {
         MockitoAnnotations.initMocks(this);
         book01 = new Book(1L,"El Aleph","Borges", Genre.DRAMA, 5600.50);
         book02 = new Book(2L,"El Proceso","Kafka", Genre.THRILLER, 6600.50);
         book03 = new Book(3L,"Rayuela","Cortazar", Genre.ADVENTURE, 5800.50);
+
+        bookDto = BookDto.builder()
+                .name(book01.getName())
+                .author(book01.getAuthor())
+                .genre(book01.getGenre())
+                .price(book01.getPrice())
+                .build();
     }
 
     @Test
@@ -78,11 +87,11 @@ class BookServiceImplTest {
     void saveBook() {
         Mockito.when(bookRepository.save(book01)).thenReturn(book01);
 
-        Book savedBook = bookService.saveBook(book01);
+        BookDto savedBook = bookService.saveBook(bookDto);
 
         assertNotNull(savedBook);
 
-        assertEquals(book01,savedBook);
+        assertEquals(book01.getAuthor(),savedBook.getAuthor());
 
         System.out.println(" ID Book saved: "+ savedBook.getId());
     }

@@ -38,8 +38,16 @@ public class BookServiceImpl implements BookService{
     }
 
     @Override
-    public Book saveBook(Book newBook) {
-        return bookRepository.save(newBook);
+    public BookDto saveBook(BookDto newBook) {
+        Book book = Book.builder()
+                .name(newBook.getName())
+                .author(newBook.getAuthor())
+                .genre(newBook.getGenre())
+                .price(newBook.getPrice())
+                .build();
+        bookRepository.save(book);
+        newBook.setId(book.getId());
+        return newBook;
     }
 
     @Override
@@ -48,7 +56,7 @@ public class BookServiceImpl implements BookService{
     }
 
     @Override
-    public boolean dtoIsOk(BookDto bookDto) {
+    public Boolean dtoIsOk(BookDto bookDto) {
         if(bookDto==null)
             return false;
         else if (bookDto.getName()!=null && bookDto.getGenre()!=null &&
