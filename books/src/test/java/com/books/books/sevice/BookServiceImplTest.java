@@ -8,21 +8,21 @@ import org.hamcrest.CoreMatchers;
 import org.junit.Assert;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
-import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @SpringBootTest
 class BookServiceImplTest {
@@ -61,7 +61,7 @@ class BookServiceImplTest {
     void listAllBooksByGenre() {
         Mockito.when(bookRepository.findAll()).thenReturn(Arrays.asList(book01,book02,book03));
 
-        List<Book> bookList = bookService.listAllBooksByGenre(Genre.DRAMA);
+        List<BookDto> bookList = bookService.listAllBooksByGenre(Genre.DRAMA);
 
         List<Long> idsBookselectByGenre = bookList.stream().map(book -> book.getId()).collect(Collectors.toList());
 
@@ -74,7 +74,7 @@ class BookServiceImplTest {
     void findBookByName() {
         Mockito.when(bookRepository.findAll()).thenReturn(Arrays.asList(book01,book02,book03));
 
-        List<Book> bookList = bookService.findBookByName("El Proceso");
+        List<BookDto> bookList = bookService.findBookByName("El Proceso");
 
         List<Long> idsBookselectByGenre = bookList.stream().map(book -> book.getId()).collect(Collectors.toList());
 
@@ -103,39 +103,58 @@ class BookServiceImplTest {
         verify(bookRepository).deleteById(any());
     }
 
+
 ////////////////////////////////////////////////////////////////////////////////////
 
     @Test
-    void dtoIsOk_return_true_when_all_attributes_are_complete(){
-        BookDto bookDto = BookDto.builder()
-                .name("El Proceso")
-                .genre(Genre.DRAMA)
-                .author("Kafka")
-                .price(5600.0)
-                .build();
-        boolean isOk = bookService.dtoIsOk(bookDto);
-
-        assertTrue(isOk);
+    void idExist_should_return_true_if_id_exist() {
+        when(bookRepository.existsById(1L)).thenReturn(true);
+        Boolean value = bookService.idExist(1L);
+        assertTrue(value);
     }
 
     @Test
-    void dtoIsOk_return_false_when_someone_attribute_is_null(){
-        BookDto bookDto = BookDto.builder()
-                .name("El Proceso")
-                .genre(null)
-                .author("Kafka")
-                .price(5600.0)
-                .build();
-        boolean isOk = bookService.dtoIsOk(bookDto);
+    void idExist_should_return_false_if_id_not_exist() {
+        when(bookRepository.existsById(8L)).thenReturn(false);
+        Boolean value = bookService.idExist(8L);
+        assertFalse(value);
 
-        assertFalse(isOk);
     }
 
     @Test
-    void dtoIsOk_return_false_when_bookDto_is_null(){
-        BookDto bookDto = null;
-        boolean isOk = bookService.dtoIsOk(bookDto);
-        assertFalse(isOk);
+    void idExist_should_return_false_because_id_is_null() {
+        Boolean value = bookService.idExist(null);
+        assertFalse(value);
+    }
+
+////////////////////////////////////////////////////////////////////////////////////
+
+    @Test
+    void updateBook_should_return_bookDto_when_id_exist() {
+        BookDto putBookDto = BookDto.builder()
+                .price(7890.0)
+                .build();
+
+        when(bookRepository.findById(1L)).thenReturn(Optional.of(book01));
+
+        Optional<BookDto> bookDto1 = bookService.updateBook(putBookDto,1L);
+
+        assertEquals(bookDto1.get().getPrice(),book01.getPrice());
+        assertEquals(bookDto1.get().getName(),book01.getName());
+
+    }
+
+    @Test
+    void updateBook_should_return_null_when_id__not_exist() {
+        BookDto putBookDto = BookDto.builder()
+                .price(7890.0)
+                .build();
+
+        when(bookRepository.findById(8L)).thenReturn(Optional.empty());
+
+        Optional<BookDto> bookDto1 = bookService.updateBook(putBookDto,8L);
+
+        assertEquals(Optional.empty(),bookDto1);
     }
 ////////////////////////////////////////////////////////////////////////////////////
 

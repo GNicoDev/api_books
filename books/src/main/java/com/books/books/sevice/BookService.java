@@ -3,18 +3,20 @@ import com.books.books.controller.dto.BookDto;
 import com.books.books.entity.*;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface BookService {
-    List<Book> listAllBooks();
+    List<BookDto> listAllBooks();
 
-    List<Book> listAllBooksByGenre(Genre genre);
+    List<BookDto> listAllBooksByGenre(Genre genre);
 
-    List<Book> findBookByName(String name);
+    List<BookDto> findBookByName(String name);
 
     BookDto saveBook(BookDto newBook);
 
+    Optional<BookDto> updateBook(BookDto bookDto, Long id);
+
     void deleteBookById(Long id);
 
-    Boolean dtoIsOk(BookDto bookDto);
-
+    Boolean idExist(Long id);
 }
