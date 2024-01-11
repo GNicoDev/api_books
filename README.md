@@ -8,7 +8,7 @@
 
 It's possible to run Api-books. For this you will need to have the Java Development Kit (JDK) 17.0.6 and MySql installed and configured on your machine.
 
->Api-books has 3 branch
+>Api-books has 3 branches
 
 <li> main - when we have the project finished
 <li> testMockito - is a unit test using only Mockito
