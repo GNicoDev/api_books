@@ -10,6 +10,6 @@ It's possible to run Api-books. For this you will need to have the Java Developm
 
 >Api-books has 3 branches
 
-<li> main - when we have the project finished
+<li> main - where we have the project finished
 <li> testMockito - is a unit test using only Mockito
 <li> testMockMvc - unit test using Mockito and MockMvc in the RestController </li>
